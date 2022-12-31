@@ -89,6 +89,7 @@ class Trainer(object):
         self.iteration = 0
         self.max_iter = max_iter
         self.best_mean_iu = 0
+        print(self.out)
 
     def validate(self):
         training = self.model.training
@@ -170,10 +171,12 @@ class Trainer(object):
         self.model.train()
 
         n_class = len(self.train_loader.dataset.class_names)
-
-        for batch_idx, (data, target) in tqdm.tqdm(
-                enumerate(self.train_loader), total=len(self.train_loader),
-                desc='Train epoch=%d' % self.epoch, ncols=80, leave=False):
+        print(self.train_loader.dataset.class_names)
+        for batch_idx, (data, target) in enumerate(self.train_loader):
+        # for batch_idx, (data, target) in tqdm.tqdm(
+        #         enumerate(self.train_loader), total=len(self.train_loader),
+        #         desc=f'Train epoch = {self.epoch}', ncols=80, leave=False):
+            print('start of epoch')
             iteration = batch_idx + self.epoch * len(self.train_loader)
             if self.iteration != 0 and (iteration - 1) != self.iteration:
                 continue  # for resuming
@@ -216,7 +219,7 @@ class Trainer(object):
                     metrics.tolist() + [''] * 5 + [elapsed_time]
                 log = map(str, log)
                 f.write(','.join(log) + '\n')
-
+            print('end of epoch')
             if self.iteration >= self.max_iter:
                 break
 

@@ -7,8 +7,10 @@ import torchvision
 
 
 def VGG16(pretrained=False):
-    model = torchvision.models.vgg16(pretrained=False)
-    if not pretrained:
+    if pretrained:
+        model = torchvision.models.vgg16(weights = torchvision.models.VGG16_Weights.IMAGENET1K_V1)
+    else:
+        model = torchvision.models.vgg16(weights = None)
         return model
     model_file = _get_vgg16_pretrained_model()
     state_dict = torch.load(model_file)
