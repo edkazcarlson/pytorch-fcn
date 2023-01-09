@@ -31,6 +31,7 @@ def main():
 
     n_class = len(val_loader.dataset.class_names)
 
+    print(osp.basename(model_file))
     if osp.basename(model_file).startswith('fcn32s'):
         model = torchfcn.models.FCN32s(n_class=21)
     elif osp.basename(model_file).startswith('fcn16s'):

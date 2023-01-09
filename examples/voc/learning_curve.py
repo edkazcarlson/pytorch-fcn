@@ -42,6 +42,7 @@ def learning_curve(log_file):
         df_train = df_train.rolling(window=10).mean()
     else:
         df_train = pandas.rolling_mean(df_train, window=10)
+    print(df_train)
     df_train = df_train.dropna()
     iter_per_epoch = df_train[df_train['epoch'] == 1]['iteration'].values[0]
     df_train['epoch_detail'] = df_train['iteration'] / iter_per_epoch

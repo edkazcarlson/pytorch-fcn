@@ -8,7 +8,8 @@ import PIL.Image
 import scipy.io
 import torch
 from torch.utils import data
-
+import cv2
+import torchvision
 
 class VOCClassSegBase(data.Dataset):
 
@@ -35,7 +36,6 @@ class VOCClassSegBase(data.Dataset):
         'train',
         'tv/monitor',
     ])
-    mean_bgr = np.array([104.00698793, 116.66876762, 122.67891434])
 
     def __init__(self, root, split='train', transform=False):
         self.root = root
@@ -77,19 +77,41 @@ class VOCClassSegBase(data.Dataset):
         else:
             return img, lbl
 
+    #img is 0-255
     def transform(self, img, lbl):
-        img = img[:, :, ::-1]  # RGB -> BGR
-        img = img.astype(np.float64)
-        img -= self.mean_bgr
-        img = img.transpose(2, 0, 1)
-        img = torch.from_numpy(img).float()
+        #bgr -> hsv
+        # print(f'type: {type(img)}')
+        # print(f'np.max(img): {np.max(img)}')
+        # print(f'np.min(img): {np.min(img)}')
+        # exit()
+        # print(f'1img[0,0]: {img[0,0]}')
+        img = np.float32(img)
+
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+        # print(f'2img[0,0]: {img[0,0]}')
+        img = torch.tensor(img)
+        # print(f'1img.shape: {img.shape}')
+        img = img.transpose(2,1)
+        # print(f'2img.shape: {img.shape}')
+        img = img.transpose(0,1)
+        # print(f'3img.shape: {img.shape}')
+        # exit()
+        # img = PIL.Image.fromarray(img)
+
+        #hsv -> absv
+        img = hsv2absv(img, False)
         lbl = torch.from_numpy(lbl).long()
         return img, lbl
 
     def untransform(self, img, lbl):
+        #absv -> hsv
+        img = absv2hsv(img, False)
+        #hsv -> bgr
+        img = img.transpose(0, 1).transpose(1, 2)
         img = img.numpy()
-        img = img.transpose(1, 2, 0)
-        img += self.mean_bgr
+        img = cv2.cvtColor(img, cv2.COLOR_HSV2BGR)
+
+        # img = img.transpose(1, 2, 0)
         img = img.astype(np.uint8)
         img = img[:, :, ::-1]
         lbl = lbl.numpy()
@@ -160,3 +182,62 @@ class SBDClassSeg(VOCClassSegBase):
             return self.transform(img, lbl)
         else:
             return img, lbl
+
+# https://docs.opencv.org/4.x/de/d25/imgproc_color_conversions.html#color_convert_rgb_hsv
+def hsv2absv(x, normalizeSB):
+    sMean = -0.4567486643791199
+    vMean =  0.0775344967842102
+
+    sStd = 0.42398601770401
+    vStd = 0.47892168164253235
+
+    x = x.float()
+    # print(f'hsv2absv: {x}')
+    h = x[0]
+    s = x[1]
+    v = x[2]
+    # print(f'h shape:  {h.shape}')
+    h = torch.pi * 2 * (h / 360)
+    a = torch.sin(h)
+    b = torch.cos(h)
+    s /= 255
+    v /= 255
+
+    s = (s - .5) * 2
+    v = (v - .5) * 2
+
+    if normalizeSB:
+        s = (s - sMean)/sStd
+        v = (v - vMean)/vStd
+    absv = torch.stack((a,b,s,v))
+    return absv
+
+# https://docs.opencv.org/4.x/de/d25/imgproc_color_conversions.html#color_convert_rgb_hsv
+def absv2hsv(x, normalizeSB):
+    sMean = -0.4567486643791199
+    vMean =  0.0775344967842102
+
+    sStd = 0.42398601770401
+    vStd = 0.47892168164253235
+
+    x = x.float()
+    a = x[0]#sin
+    b = x[1]#cos
+    s = x[2]
+    v = x[2]
+    # print(f'h shape:  {h.shape}')
+    t = torch.arctan2(a, b) #radians
+    h = 360 * (t / (2 * torch.pi)) #degrees
+    h = torch.where( h < 0 , h + 360, h)
+    s /= 255
+    v /= 255
+
+    s = (s / 2) + .5
+    v = (v / 2) + .5
+
+    if normalizeSB:
+        s = s * sStd + sMean
+        v = v * vStd + vMean
+
+    hsv = torch.stack((h,s,v))
+    return hsv

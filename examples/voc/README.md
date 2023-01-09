@@ -65,3 +65,12 @@ cd pytorch-fcn
 cd examples/voc
 ./model_caffe_to_pytorch.py
 ```
+
+
+py train_fcn32s.py -g 0 
+py train_fcn16s.py -g 0 --pretrained-model logs\\ \\model_best.pth.tar
+py train_fcn8s.py -g 0 --pretrained-model logs\\ \\model_best.pth.tar
+
+py learning_curve.py C:\\Users\\Edward\\Desktop\\pytorch-fcn\\examples\\voc\\logs\\ fcn32-absv\\log.csv
+./view_log logs\\fcn32-absv\\log.csv
+py evaluate model_file C:\\Users\\Edward\\Desktop\\pytorch-fcn\\examples\\voc\\logs\\fcn32-absv\\log.csv -g 0

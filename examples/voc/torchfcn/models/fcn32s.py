@@ -39,7 +39,7 @@ class FCN32s(nn.Module):
     def __init__(self, n_class=21):
         super(FCN32s, self).__init__()
         # conv1
-        self.conv1_1 = nn.Conv2d(3, 64, 3, padding=100)
+        self.conv1_1 = nn.Conv2d(4, 64, 3, padding=100)
         self.relu1_1 = nn.ReLU(inplace=True)
         self.conv1_2 = nn.Conv2d(64, 64, 3, padding=1)
         self.relu1_2 = nn.ReLU(inplace=True)
@@ -142,38 +142,4 @@ class FCN32s(nn.Module):
 
         h = self.upscore(h)
         h = h[:, :, 19:19 + x.size()[2], 19:19 + x.size()[3]].contiguous()
-
         return h
-
-    def copy_params_from_vgg16(self, vgg16):
-        features = [
-            self.conv1_1, self.relu1_1,
-            self.conv1_2, self.relu1_2,
-            self.pool1,
-            self.conv2_1, self.relu2_1,
-            self.conv2_2, self.relu2_2,
-            self.pool2,
-            self.conv3_1, self.relu3_1,
-            self.conv3_2, self.relu3_2,
-            self.conv3_3, self.relu3_3,
-            self.pool3,
-            self.conv4_1, self.relu4_1,
-            self.conv4_2, self.relu4_2,
-            self.conv4_3, self.relu4_3,
-            self.pool4,
-            self.conv5_1, self.relu5_1,
-            self.conv5_2, self.relu5_2,
-            self.conv5_3, self.relu5_3,
-            self.pool5,
-        ]
-        for l1, l2 in zip(vgg16.features, features):
-            if isinstance(l1, nn.Conv2d) and isinstance(l2, nn.Conv2d):
-                assert l1.weight.size() == l2.weight.size()
-                assert l1.bias.size() == l2.bias.size()
-                l2.weight.data = l1.weight.data
-                l2.bias.data = l1.bias.data
-        for i, name in zip([0, 3], ['fc6', 'fc7']):
-            l1 = vgg16.classifier[i]
-            l2 = getattr(self, name)
-            l2.weight.data = l1.weight.data.view(l2.weight.size())
-            l2.bias.data = l1.bias.data.view(l2.bias.size())
