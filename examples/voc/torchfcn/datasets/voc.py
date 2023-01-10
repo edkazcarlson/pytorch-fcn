@@ -36,7 +36,8 @@ class VOCClassSegBase(data.Dataset):
         'train',
         'tv/monitor',
     ])
-
+    #bgr values not ABSV
+    mean_bgr = np.array([104.00698793, 116.66876762, 122.67891434])
     def __init__(self, root, split='train', transform=False):
         self.root = root
         self.split = split
@@ -79,39 +80,39 @@ class VOCClassSegBase(data.Dataset):
 
     #img is 0-255
     def transform(self, img, lbl):
-        #bgr -> hsv
-        # print(f'type: {type(img)}')
-        # print(f'np.max(img): {np.max(img)}')
-        # print(f'np.min(img): {np.min(img)}')
-        # exit()
-        # print(f'1img[0,0]: {img[0,0]}')
-        img = np.float32(img)
+        #original transform:
+        img = img[:, :, ::-1]  # RGB -> BGR
+        img = img.astype(np.float64)
+        img -= self.mean_bgr
+        img = img.transpose(2, 0, 1)
+        img = torch.from_numpy(img).float()
+        # #bgr -> hsv
+        # img = np.float32(img)
 
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-        # print(f'2img[0,0]: {img[0,0]}')
-        img = torch.tensor(img)
-        # print(f'1img.shape: {img.shape}')
-        img = img.transpose(2,1)
-        # print(f'2img.shape: {img.shape}')
-        img = img.transpose(0,1)
-        # print(f'3img.shape: {img.shape}')
-        # exit()
-        # img = PIL.Image.fromarray(img)
-
-        #hsv -> absv
-        img = hsv2absv(img, False)
+        # img = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+        # img = torch.tensor(img)
+        # img = img.transpose(2,1)
+        # img = img.transpose(0,1)
+        # #hsv -> absv
+        # img = hsv2absv(img, False)
         lbl = torch.from_numpy(lbl).long()
         return img, lbl
 
     def untransform(self, img, lbl):
-        #absv -> hsv
-        img = absv2hsv(img, False)
-        #hsv -> bgr
-        img = img.transpose(0, 1).transpose(1, 2)
-        img = img.numpy()
-        img = cv2.cvtColor(img, cv2.COLOR_HSV2BGR)
+        # #absv -> hsv
+        # img = absv2hsv(img, False)
+        # #hsv -> bgr
+        # img = img.transpose(0, 1).transpose(1, 2)
+        # img = img.numpy()
+        # img = cv2.cvtColor(img, cv2.COLOR_HSV2BGR)
 
-        # img = img.transpose(1, 2, 0)
+        # # img = img.transpose(1, 2, 0)
+        # img = img.astype(np.uint8)
+        # img = img[:, :, ::-1]
+        # lbl = lbl.numpy()
+        img = img.numpy()
+        img = img.transpose(1, 2, 0)
+        img += self.mean_bgr
         img = img.astype(np.uint8)
         img = img[:, :, ::-1]
         lbl = lbl.numpy()

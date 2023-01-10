@@ -71,6 +71,10 @@ py train_fcn32s.py -g 0
 py train_fcn16s.py -g 0 --pretrained-model logs\\ \\model_best.pth.tar
 py train_fcn8s.py -g 0 --pretrained-model logs\\ \\model_best.pth.tar
 
-py learning_curve.py C:\\Users\\Edward\\Desktop\\pytorch-fcn\\examples\\voc\\logs\\ fcn32-absv\\log.csv
+py learning_curve.py C:\\Users\\Edward\\Desktop\\pytorch-fcn\\examples\\voc\\logs\\fcn32s-absv\\log.csv
 ./view_log logs\\fcn32-absv\\log.csv
-py evaluate model_file C:\\Users\\Edward\\Desktop\\pytorch-fcn\\examples\\voc\\logs\\fcn32-absv\\log.csv -g 0
+py evaluate.py model_file C:\\Users\\Edward\\Desktop\\pytorch-fcn\\examples\\voc\\logs\\fcn32s-absv\\log.csv -g 0
+
+py learning_curve.py C:\\Users\\Edward\\Desktop\\pytorch-fcn\\examples\\voc\\logs\\fcn32s-rgb\\log.csv
+./view_log logs\\fcn32s-rgb\\log.csv
+$ py evaluate.py C:\\Users\\Edward\\Desktop\\pytorch-fcn\\examples\\voc\\logs\\fcn32s-rgb\\fcn32s.tar -g 0
