@@ -112,6 +112,9 @@ def main():
         model.load_state_dict(checkpoint['model_state_dict'])
         start_epoch = checkpoint['epoch']
         start_iteration = checkpoint['iteration']
+    else:
+        vgg16 = torchfcn.models.VGG16(pretrained=True)
+        model.copy_params_from_vgg16(vgg16)
     if cuda:
         model = model.cuda()
 

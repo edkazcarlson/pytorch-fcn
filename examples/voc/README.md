@@ -77,4 +77,7 @@ py evaluate.py model_file C:\\Users\\Edward\\Desktop\\pytorch-fcn\\examples\\voc
 
 py learning_curve.py C:\\Users\\Edward\\Desktop\\pytorch-fcn\\examples\\voc\\logs\\fcn32s-rgb\\log.csv
 ./view_log logs\\fcn32s-rgb\\log.csv
-$ py evaluate.py C:\\Users\\Edward\\Desktop\\pytorch-fcn\\examples\\voc\\logs\\fcn32s-rgb\\fcn32s.tar -g 0
+$ py evaluate.py C:\\Users\\Edward\\Desktop\\pytorch-fcn\\examples\\voc\\logs\\fcn32s-rgb-pretrained\\fcn32s.tar -g 0
+
+py learning_curve.py C:\\Users\\Edward\\Desktop\\pytorch-fcn\\examples\\voc\\logs\\fcn32s-rgb-pretrained\\log.csv
+./view_log logs\\fcn32s-rgb-pretrained\\log.csv 
